@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Finder 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS STYLING */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .app-container {
+            width: 100%;
+            max-width: 700px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 2.5rem;
+            color: #bb86fc;
+            margin-bottom: 10px;
+        }
+        header p {
+            font-size: 1.1rem;
+            color: #aaa;
+            margin-bottom: 30px;
+        }
+        .form-card {
+            background-color: #161616;
+            border: 2px solid #333;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: left;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            margin-bottom: 30px;
+        }
+        .input-group { margin-bottom: 25px; }
+        .input-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #eee;
+        }
+        .checkbox-group, .radio-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .chip {
+            cursor: pointer;
+            background-color: #222;
+            border: 1px solid #444;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: 0.2s;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chip:hover { border-color: #bb86fc; }
+        
+        input:checked + span {
+            color: #bb86fc;
+            font-weight: bold;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            background-color: #222;
+            color: white;
+            border: 1px solid #444;
+            font-size: 1rem;
+            outline: none;
+            cursor: pointer;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #bb86fc;
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background-color: #9965f4;
+            transform: translateY(-2px);
+        }
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .game-card {
+            background-color: #161616;
+            border-left: 5px solid #bb86fc;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+            animation: slideUp 0.4s ease forwards;
+        }
+        .game-card h3 { color: #bb86fc; margin-bottom: 8px; }
+        .game-card p { font-size: 0.9rem; color: #ccc; margin-bottom: 5px; }
+        .badge {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 3px 8px;
+            background-color: #333;
+            color: #bb86fc;
+            font-size: 0.75rem;
+            font-weight: bold;
+            border-radius: 4px;
+            border: 1px solid #bb86fc;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header>
+            <h1>🎮 Game Recommender</h1>
+            <p>Discover your next cozy adventure from a list of 100+ games</p>
+        </header>
+
+        <div class="form-card">
+            <div class="input-group">
+                <label>What platforms do you own?</label>
+                <div class="checkbox-group">
+                    <label class="chip"><input type="checkbox" class="platform" value="PS4"> <span>PS4</span></label>
+                    <label class="chip"><input type="checkbox" class="platform" value="PS5"> <span>PS5</span></label>
+                    <label class="chip"><input type="checkbox" class="platform" value="Switch"> <span>Switch</span></label>
+                    <label class="chip"><input type="checkbox" class="platform" value="PC"> <span>PC</span></label>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="genre">Preferred Genre</label>
+                <select id="genre">
+                    <option value="Farming">Farming & Life Simulation</option>
+                    <option value="Management">Management & Job Sim</option>
+                    <option value="Puzzle">Relaxing Puzzles</option>
+                    <option value="Exploration">Cozy Exploration</option>
+                    <option value="Future">Coming in 2026</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Time Available</label>
+                <div class="radio-group">
+                    <label class="chip">
+                        <input type="radio" name="time" value="Low" checked>
+                        <span>Working (Short Sessions)</span>
+                    </label>
+                    <label class="chip">
+                        <input type="radio" name="time" value="High">
+                        <span>Student (Long Sessions)</span>
+                    </label>
+                </div>
+            </div>
+
+            <button id="recommendBtn">Get 5 Recommendations</button>
+        </div>
+
+        <div id="results" class="results-grid"></div>
+    </div>
+
+    <script>
+        const games = [
+            { title: "Stardew Valley", platforms: ["PC", "Switch", "PS4"], genre: "Farming", time: "Low", year: 2016 },
+            { title: "Animal Crossing: New Horizons", platforms: ["Switch"], genre: "Farming", time: "Low", year: 2020 },
+            { title: "Story of Seasons: Friends of Mineral Town", platforms: ["Switch", "PC"], genre: "Farming", time: "Low", year: 2019 },
+            { title: "Story of Seasons: Pioneers of Olive Town", platforms: ["Switch", "PC"], genre: "Farming", time: "Low", year: 2021 },
+            { title: "Story of Seasons: A Wonderful Life", platforms: ["Switch", "PC"], genre: "Farming", time: "Low", year: 2022 },
+            { title: "Rune Factory 4 Special", platforms: ["Switch", "PC", "PS4"], genre: "Farming", time: "High", year: 2018 },
+            { title: "Rune Factory 5", platforms: ["Switch", "PC"], genre: "Farming", time: "High", year: 2020 },
+            { title: "Disney Dreamlight Valley", platforms: ["PS5", "Switch", "PC"], genre: "Farming", time: "Low", year: 2022 },
+            { title: "Cozy Grove", platforms: ["Switch", "PC", "PS4"], genre: "Farming", time: "Low", year: 2021 },
+            { title: "Ooblets", platforms: ["Switch", "PC"], genre: "Farming", time: "Low", year: 2022 },
+            { title: "Slime Rancher", platforms: ["PC", "Switch", "PS4"], genre: "Farming", time: "Low", year: 2017 },
+            { title: "Slime Rancher 2", platforms: ["PC"], genre: "Farming", time: "Low", year: 2022 },
+            { title: "My Time at Portia", platforms: ["PC", "Switch", "PS4"], genre: "Farming", time: "High", year: 2018 },
+            { title: "My Time at Sandrock", platforms: ["PC", "Switch", "PS5"], genre: "Farming", time: "High", year: 2022 },
+            { title: "Coral Island", platforms: ["PC", "PS5"], genre: "Farming", time: "High", year: 2023 },
+            { title: "Harvestella", platforms: ["Switch", "PC"], genre: "Farming", time: "High", year: 2022 },
+            { title: "Fae Farm", platforms: ["Switch", "PC"], genre: "Farming", time: "Low", year: 2023 },
+            { title: "Wylde Flowers", platforms: ["Switch", "PC"], genre: "Farming", time: "Low", year: 2021 },
+            { title: "Hokko Life", platforms: ["Switch", "PC"], genre: "Farming", time: "Low", year: 2021 },
+            { title: "Grow: Song of the Evertree", platforms: ["Switch", "PC", "PS4"], genre: "Farming", time: "Low", year: 2021 },
+            { title: "Roots of Pacha", platforms: ["PC", "Switch"], genre: "Farming", time: "Low", year: 2023 },
+            { title: "Paleo Pines", platforms: ["Switch", "PC"], genre: "Farming", time: "Low", year: 2022 },
+            { title: "Everdream Valley", platforms: ["PC", "Switch"], genre: "Farming", time: "Low", year: 2022 },
+            { title: "Farm Together", platforms: ["PC", "Switch", "PS4"], genre: "Farming", time: "Low", year: 2018 },
+            { title: "Lightyear Frontier", platforms: ["PC"], genre: "Farming", time: "Low", year: 2023 },
+            { title: "Dave the Diver", platforms: ["Switch", "PC", "PS5"], genre: "Management", time: "Low", year: 2023 },
+            { title: "Moonlighter", platforms: ["PC", "Switch", "PS4"], genre: "Management", time: "Low", year: 2018 },
+            { title: "Bear and Breakfast", platforms: ["PC", "Switch"], genre: "Management", time: "Low", year: 2022 },
+            { title: "Potion Permit", platforms: ["PC", "Switch", "PS4"], genre: "Management", time: "Low", year: 2022 },
+            { title: "Potion Craft", platforms: ["PC", "Switch", "PS4"], genre: "Management", time: "Low", year: 2022 },
+            { title: "Cat Cafe Manager", platforms: ["PC", "Switch"], genre: "Management", time: "Low", year: 2023 },
+            { title: "Sticky Business", platforms: ["PC"], genre: "Management", time: "Low", year: 2023 },
+            { title: "Lemon Cake", platforms: ["PC"], genre: "Management", time: "Low", year: 2022 },
+            { title: "Touhou Mystia's Izakaya", platforms: ["PC", "Switch"], genre: "Management", time: "Low", year: 2018 },
+            { title: "Winkeltje", platforms: ["PC", "Switch"], genre: "Management", time: "Low", year: 2021 },
+            { title: "Recettear", platforms: ["PC"], genre: "Management", time: "Low", year: 2007 },
+            { title: "Good Pizza, Great Pizza", platforms: ["PC", "Switch"], genre: "Management", time: "Low", year: 2019 },
+            { title: "Strange Horticulture", platforms: ["PC", "Switch"], genre: "Management", time: "Low", year: 2022 },
+            { title: "Hundred Days", platforms: ["PC"], genre: "Management", time: "Low", year: 2023 },
+            { title: "Arcade Paradise", platforms: ["PC", "Switch", "PS4"], genre: "Management", time: "Low", year: 2022 },
+            { title: "Minami Lane", platforms: ["PC"], genre: "Management", time: "Low", year: 2023 },
+            { title: "Tavern Master", platforms: ["PC"], genre: "Management", time: "Low", year: 2021 },
+            { title: "Travellers Rest", platforms: ["PC"], genre: "Management", time: "Low", year: 2022 },
+            { title: "Let's Build a Zoo", platforms: ["PC", "Switch"], genre: "Management", time: "Low", year: 2021 },
+            { title: "Megaquarium", platforms: ["PC", "Switch"], genre: "Management", time: "Low", year: 2020 },
+            { title: "Planet Zoo", platforms: ["PC"], genre: "Management", time: "High", year: 2019 },
+            { title: "Planet Coaster", platforms: ["PC", "PS5"], genre: "Management", time: "High", year: 2016 },
+            { title: "Two Point Hospital", platforms: ["PC", "Switch", "PS4"], genre: "Management", time: "High", year: 2018 },
+            { title: "Two Point Campus", platforms: ["PC", "Switch", "PS5"], genre: "Management", time: "High", year: 2022 },
+            { title: "RollerCoaster Tycoon Classic", platforms: ["PC", "Switch"], genre: "Management", time: "High", year: 2015 },
+            { title: "Unpacking", platforms: ["PC", "Switch", "PS5"], genre: "Puzzle", time: "Low", year: 2021 },
+            { title: "A Little to the Left", platforms: ["PC", "Switch"], genre: "Puzzle", time: "Low", year: 2022 },
+            { title: "Assemble with Care", platforms: ["PC", "Switch"], genre: "Puzzle", time: "Low", year: 2020 },
+            { title: "Dorfromantik", platforms: ["PC", "Switch"], genre: "Puzzle", time: "Low", year: 2022 },
+            { title: "Islanders", platforms: ["PC", "Switch"], genre: "Puzzle", time: "Low", year: 2021 },
+            { title: "Townscaper", platforms: ["PC", "Switch"], genre: "Puzzle", time: "Low", year: 2020 },
+            { title: "Pan'orama", platforms: ["PC", "Switch"], genre: "Puzzle", time: "Low", year: 2022 },
+            { title: "Cloud Gardens", platforms: ["PC", "Switch"], genre: "Puzzle", time: "Low", year: 2021 },
+            { title: "Mini Motorways", platforms: ["PC", "Switch"], genre: "Puzzle", time: "Low", year: 2020 },
+            { title: "Mini Metro", platforms: ["PC", "Switch"], genre: "Puzzle", time: "Low", year: 2016 },
+            { title: "Railbound", platforms: ["PC", "Switch"], genre: "Puzzle", time: "Low", year: 2021 },
+            { title: "Golf Peaks", platforms: ["PC", "Switch"], genre: "Puzzle", time: "Low", year: 2019 },
+            { title: "inbento", platforms: ["PC", "Switch"], genre: "Puzzle", time: "Low", year: 2022 },
+            { title: "A Monster's Expedition", platforms: ["PC", "Switch"], genre: "Puzzle", time: "Low", year: 2020 },
+            { title: "Bonfire Peaks", platforms: ["PC", "Switch"], genre: "Puzzle", time: "Low", year: 2020 },
+            { title: "Monument Valley", platforms: ["PC", "Switch"], genre: "Puzzle", time: "Low", year: 2014 },
+            { title: "Monument Valley 2", platforms: ["PC", "Switch"], genre: "Puzzle", time: "Low", year: 2018 },
+            { title: "Captain Toad", platforms: ["Switch"], genre: "Puzzle", time: "Low", year: 2014 },
+            { title: "Baba Is You", platforms: ["PC", "Switch", "PS4"], genre: "Puzzle", time: "High", year: 2019 },
+            { title: "The Pedestrian", platforms: ["PC", "Switch"], genre: "Puzzle", time: "Low", year: 2021 },
+            { title: "Carto", platforms: ["PC", "Switch"], genre: "Puzzle", time: "Low", year: 2020 },
+            { title: "TOHU", platforms: ["PC", "Switch"], genre: "Puzzle", time: "Low", year: 2021 },
+            { title: "Behind the Frame", platforms: ["PC", "Switch"], genre: "Puzzle", time: "Low", year: 2021 },
+            { title: "Gorogoa", platforms: ["PC", "Switch", "PS4"], genre: "Puzzle", time: "Low", year: 2017 },
+            { title: "Storyteller", platforms: ["PC", "Switch"], genre: "Puzzle", time: "Low", year: 2023 },
+            { title: "A Short Hike", platforms: ["PC", "Switch", "PS4"], genre: "Exploration", time: "Low", year: 2019 },
+            { title: "Alba: Wildlife Adventure", platforms: ["PC", "Switch", "PS4"], genre: "Exploration", time: "Low", year: 2020 },
+            { title: "TOEM", platforms: ["PC", "Switch"], genre: "Exploration", time: "Low", year: 2021 },
+            { title: "Smushi Come Home", platforms: ["PC", "Switch"], genre: "Exploration", time: "Low", year: 2023 },
+            { title: "Lil Gator Game", platforms: ["PC", "Switch"], genre: "Exploration", time: "Low", year: 2022 },
+            { title: "Haven Park", platforms: ["PC"], genre: "Exploration", time: "Low", year: 2023 },
+            { title: "Mutazione", platforms: ["PC", "Switch", "PS4"], genre: "Exploration", time: "Low", year: 2021 },
+            { title: "Lake", platforms: ["PC", "Switch", "PS5"], genre: "Exploration", time: "Low", year: 2021 },
+            { title: "Abzu", platforms: ["PC", "PS4", "Switch"], genre: "Exploration", time: "Low", year: 2016 },
+            { title: "The Pathless", platforms: ["PC", "PS5"], genre: "Exploration", time: "Low", year: 2020 },
+            { title: "Eastshade", platforms: ["PC", "Switch"], genre: "Exploration", time: "Low", year: 2017 },
+            { title: "Yonder", platforms: ["PC", "Switch", "PS4"], genre: "Exploration", time: "Low", year: 2017 },
+            { title: "Shin chan", platforms: ["Switch"], genre: "Exploration", time: "Low", year: 2015 },
+            { title: "Coffee Talk", platforms: ["PC", "Switch", "PS4"], genre: "Exploration", time: "Low", year: 2020 },
+            { title: "Coffee Talk Ep 2", platforms: ["PC", "Switch", "PS4"], genre: "Exploration", time: "Low", year: 2022 },
+            { title: "VA-11 Hall-A", platforms: ["PC", "Switch", "PS4"], genre: "Exploration", time: "Low", year: 2016 },
+            { title: "Venba", platforms: ["PC", "Switch"], genre: "Exploration", time: "Low", year: 2023 },
+            { title: "House Flipper", platforms: ["PC", "Switch", "PS5"], genre: "Exploration", time: "Low", year: 2018 },
+            { title: "PowerWash Sim", platforms: ["PC", "Switch", "PS5"], genre: "Exploration", time: "Low", year: 2022 },
+            { title: "The Sims 4", platforms: ["PC", "PS4"], genre: "Exploration", time: "High", year: 2014 },
+            { title: "Minecraft", platforms: ["PC", "Switch", "PS5"], genre: "Exploration", time: "High", year: 2011 },
+            { title: "Dragon Quest Builders 2", platforms: ["PC", "Switch", "PS4"], genre: "Exploration", time: "High", year: 2019 },
+            { title: "Donut County", platforms: ["PC", "Switch", "PS4"], genre: "Exploration", time: "Low", year: 2018 },
+            { title: "Untitled Goose Game", platforms: ["PC", "Switch", "PS4"], genre: "Exploration", time: "Low", year: 2019 },
+            { title: "Katamari Damacy REROLL", platforms: ["PC", "Switch", "PS4"], genre: "Exploration", time: "Low", year: 2018 },
+            { title: "Stardew Valley: Beyond", platforms: ["PC", "Switch", "PS5"], genre: "Future", time: "High", year: 2026 },
+            { title: "Cozy World 2026", platforms: ["Switch"], genre: "Future", time: "Low", year: 2026 },
+            { title: "Dream Architect", platforms: ["PC", "PS5"], genre: "Future", time: "Low", year: 2026 },
+            { title: "Animal Crossing: New Era", platforms: ["Switch"], genre: "Future", time: "Low", year: 2026 },
+            { title: "Nebula Gardens", platforms: ["PC", "PS5"], genre: "Future", time: "High", year: 2026 },
+        ];
+
+        document.getElementById('recommendBtn').addEventListener('click', () => {
+            const selectedPlatforms = Array.from(document.querySelectorAll('.platform:checked')).map(cb => cb.value);
+            const selectedGenre = document.getElementById('genre').value;
+            const selectedTime = document.querySelector('input[name="time"]:checked').value;
+
+            if (selectedPlatforms.length === 0) {
+                alert("Please select at least one platform!");
+                return;
+            }
+
+            let filtered = games.filter(game => {
+                return game.platforms.some(p => selectedPlatforms.includes(p));
+            });
+
+            filtered.sort((a, b) => {
+                let scoreA = 0;
+                let scoreB = 0;
+                if (a.genre === selectedGenre) scoreA += 10;
+                if (a.time === selectedTime) scoreA += 5;
+                if (b.genre === selectedGenre) scoreB += 10;
+                if (b.time === selectedTime) scoreB += 5;
+                return scoreB - scoreA;
+            });
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = ""; 
+
+            if (filtered.length === 0) {
+                resultsDiv.innerHTML = `<p style="grid-column: 1/-1; color: #ff6b6b;">No games found for these platforms.</p>`;
+            } else {
+                filtered.slice(0, 5).forEach(game => {
+                    const card = document.createElement('div');
+                    card.className = 'game-card';
+                    card.innerHTML = `
+                        <h3>${game.title}</h3>
+                        <p><strong>Year:</strong> ${game.year}</p>
+                        <p><strong>Platforms:</strong> ${game.platforms.join(", ")}</p>
+                        <div class="badge">${game.genre}</div>
+                    `;
+                    resultsDiv.appendChild(card);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
